@@ -1,5 +1,7 @@
 use phf::{phf_map};
 
+use crate::applied_key::Applied_Key;
+
 pub static CHORD_TYPE_TO_PITCHES: phf::Map<&'static str, &'static [i32]> = phf_map! {
     "M" => &[0, 4, 7],
     "m" => &[0, 3, 7],
@@ -56,6 +58,30 @@ pub static STARTING_PITCH: phf::Map<&'static str, i32> = phf_map! {
     "Bs" => 60,
 };
 
+fn roman_numeral_to_note(applied_key_root: String, applied_key_tones: &[i32], roman_numeral: &str) -> i32 {
+    let mut modifier = 0;
+    let mut roman_numeral = roman_numeral.to_string();
+
+    if roman_numeral.starts_with("b") {
+        modifier = -1;
+        roman_numeral = roman_numeral[1..].to_string();
+    } else if roman_numeral.starts_with("#") {
+        modifier = 1;
+        roman_numeral = roman_numeral[1..].to_string();
+    }
+
+    let r_n = roman_numeral.to_lowercase();
+    match r_n.as_str() {
+        "i" => applied_key_tones[0] + modifier + STARTING_PITCH[&applied_key_root],
+        "ii" => applied_key_tones[1] + modifier + STARTING_PITCH[&applied_key_root],
+        "iii" => applied_key_tones[2] + modifier + STARTING_PITCH[&applied_key_root],
+        "iv" => applied_key_tones[3] + modifier + STARTING_PITCH[&applied_key_root],
+        "v" => applied_key_tones[4] + modifier + STARTING_PITCH[&applied_key_root],
+        "vi" => applied_key_tones[5] + modifier + STARTING_PITCH[&applied_key_root],
+        "vii" => applied_key_tones[6] + modifier + STARTING_PITCH[&applied_key_root],
+        _ => panic!("Numeral not found in applied_key: {}", roman_numeral),
+    }
+}
 
 pub struct Chord {
     pub type_: String,
@@ -76,6 +102,7 @@ impl Chord {
             }).collect()
         } else {
             (0..8).map(|octave| {
+                let foo = &root;
                 CHORD_TYPE_TO_PITCHES[&type_].iter().map(|pitch| pitch + octave * 12 + STARTING_PITCH[&root]).collect()
             }).collect()
         };
@@ -88,6 +115,19 @@ impl Chord {
             pitches,
         }
     }
+}
+
+pub fn roman_progression_to_chords(applied_key: Applied_Key, roman_progression: &Vec<Vec<&str>>) -> Vec<Chord> {
+    let mut result = Vec::new();
+    for chord in roman_progression {
+        let note = roman_numeral_to_note(applied_key.root.to_string(), applied_key.tones, chord[0]);
+        let root_note = STARTING_PITCH.into_iter().find_map(|(key, &val)| if val == note { Some(key) } else { None }).unwrap();
+        let chord_type_split: Vec<&str> = chord[1].split('/').collect();
+        let operating_bit = if chord_type_split.len() < 2 { "" } else { chord_type_split[1] };
+        let chord_type = chord_type_split[0];
+        result.push(Chord::new(root_note.to_string(), Some(chord_type.to_string()), Some(operating_bit.to_string()),None));
+    }
+    result
 }
 
 fn get_undertone(is_minor: bool, operating_bit: String) -> i32 {
