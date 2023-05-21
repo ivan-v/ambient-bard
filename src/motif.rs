@@ -10,9 +10,10 @@ pub struct Motif {
 
 impl<'a> Motif {
     pub fn new(presets: Presets) -> Self {
-        let chords = crate::chord::generate_chord_progression(
-            presets.desired_chord_progression_length, presets.is_major, &presets.applied_key);
-        let chords_copy = chords.clone();
+        let chords: Vec<Chord> = crate::chord::generate_chord_progression(
+            presets.desired_chord_progression_length, 
+            presets.is_major, &presets.applied_key);
+        let chords_copy: Vec<Chord> = chords.clone();
         
         Self {
             name: std::option::Option::Some("foobar".to_owned()),

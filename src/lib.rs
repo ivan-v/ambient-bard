@@ -16,7 +16,8 @@ use song::generate_song;
 pub fn sanitize_for_javascript(notes: Vec<(i32, f32, f32)>) -> String {
     let converted: Vec<String> = notes
         .iter()
-        .map(|(num, float1, float2)| format!("({}, {}, {})", num, float1, float2))
+        .map(|(num, float1, float2)|
+             format!("({}, {}, {})", num, float1, float2))
         .collect();
     format!("[{}]", converted.join(", "))
 }

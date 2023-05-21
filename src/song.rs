@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::{motif::{self, Motif}, forms::{FORMS, sync_note_durations}, applied_key::AppliedKey, presets::Presets};
+use crate::{motif::{self, Motif}, forms::{FORMS, sync_note_durations}, 
+applied_key::AppliedKey, presets::Presets};
 
 
 pub struct Song<'a> {
@@ -13,10 +14,13 @@ pub struct Song<'a> {
 impl Song<'_> {
     pub fn new(form_type: &str, presets: Presets) -> Self {
         let form = FORMS[form_type];
-        let unique_parts_dict: HashSet<&'static str> = form.iter().cloned().collect();
-        let unique_parts_vec: Vec<&'static str> = unique_parts_dict.into_iter().collect();
+        let unique_parts_dict: HashSet<&'static str> 
+            = form.iter().cloned().collect();
+        let unique_parts_vec: Vec<&'static str> 
+            = unique_parts_dict.into_iter().collect();
         let motifs: HashMap<&str, Motif> = unique_parts_vec.into_iter()
-            .map(|part_name| (part_name, motif::Motif::new(presets.clone()))).collect();
+            .map(|part_name| 
+                (part_name, motif::Motif::new(presets.clone()))).collect();
         
         let motifs_copy = motifs.clone();
         Self {
@@ -25,7 +29,9 @@ impl Song<'_> {
             presets: presets,
             // Match parts (motifs) to form
             notes: sync_note_durations(
-                form.into_iter().flat_map(|part| motifs[part].melody.notes.clone()).collect(),
+                form.into_iter()
+                .flat_map(|part| motifs[part].melody.notes.clone())
+                .collect(),
                  Some(0.0))
         }
     }

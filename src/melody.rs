@@ -1,6 +1,7 @@
 use rand::{Rng, seq::SliceRandom};
 
-use crate::{chord::{Chord, self}, presets::{Presets}, rhythm::{RHYTHM_PDF_PRESETS, self, SPACE_VALUES}, applied_key::AppliedKey};
+use crate::{chord::{Chord, self}, presets::{Presets}, 
+rhythm::{RHYTHM_PDF_PRESETS, self, SPACE_VALUES}, applied_key::AppliedKey};
 
 #[derive(Clone)]
 pub struct Melody {
@@ -12,7 +13,8 @@ impl<'a> Melody {
     pub fn new(chords: Vec<Chord>, presets: Presets) -> Self {
 
         let rhythm: Vec<String> = rhythm::generate_rhythm(
-            presets.meter, presets.measure_count, &RHYTHM_PDF_PRESETS[&presets.rhythm_intensity]).concat();        
+            presets.meter, presets.measure_count, 
+            &RHYTHM_PDF_PRESETS[&presets.rhythm_intensity]).concat();        
         let rhythm_copy = rhythm.clone();    
 
         let notes = Self::generate_melody_from_chords(
@@ -35,17 +37,21 @@ impl<'a> Melody {
         
         let pitches =  Self::generate_pitches_for_melody(
             rhythm, chords, max_step_size, span, &applied_key);
-        let solution: Vec<(i32, f32, f32)> = Self::merge_pitches_with_rhythm(&pitches, &rhythm_copy);
+        let solution: Vec<(i32, f32, f32)> 
+            = Self::merge_pitches_with_rhythm(&pitches, &rhythm_copy);
         
         solution
     }
 
-    fn generate_chord_times_pdf(chords: Vec<Chord>, beats: (Vec<f32>, &'static str)) -> Vec<Chord> {
+    fn generate_chord_times_pdf(
+        chords: Vec<Chord>, beats: (Vec<f32>, &'static str))
+         -> Vec<Chord> {
         let mut previous_chord_time = 0.0;
         let mut result = Vec::new();
         for chord in chords {
             let mut foo = chord.clone();
-            foo.time = Some((previous_chord_time, (beats.0.len() as f32) * SPACE_VALUES[beats.1] + previous_chord_time));
+            foo.time = Some((previous_chord_time, (beats.0.len() as f32) 
+                * SPACE_VALUES[beats.1] + previous_chord_time));
             result.push(foo);
             previous_chord_time += (beats.0.len() as f32) * SPACE_VALUES[beats.1];
         }
@@ -67,8 +73,10 @@ impl<'a> Melody {
         span: (i32, i32),
         applied_key: &AppliedKey,
     ) -> Vec<i32> {
-        chords = Self::generate_chord_times_pdf(chords, (vec![1.0, 0.0, 1.0, 0.0], "qn"));
-        let mut result = vec![clamp_to_range(chords[0].pitches[0], span)];
+        chords = Self::generate_chord_times_pdf(
+            chords, (vec![1.0, 0.0, 1.0, 0.0], "qn"));
+        let mut result: Vec<i32>
+             = vec![clamp_to_range(chords[0].pitches[0], span)];
         let mut expected_motion = if rand::thread_rng().gen_bool(0.5) {
             "conjunct"
         } else {
@@ -97,8 +105,10 @@ impl<'a> Melody {
                 current_motion_count = 0;
             }
     
-            let current_chord = Self::get_chord_at_time(&chords, current_time);
-            let mut option = *current_chord.pitches.as_slice().choose(&mut rng).unwrap();
+            let current_chord: &Chord
+                 = Self::get_chord_at_time(&chords, current_time);
+            let mut option = *current_chord.pitches.as_slice()
+                .choose(&mut rng).unwrap();
             let last_pitch = *result.last().unwrap_or(&option);
     
             previous_x_notes = result
@@ -112,7 +122,8 @@ impl<'a> Melody {
             let mut tries = 0;
             while previous_x_notes.iter().all(|&pitch| pitch == option)
             || (option - last_pitch).abs() > max_step_size
-            || Self::determine_motion(option, last_pitch) != expected_motion
+            || Self::determine_motion(option, last_pitch) 
+                != expected_motion
             {
                 tries += 1;
                 let mut options: Vec<i32> = Vec::new();
@@ -138,7 +149,8 @@ impl<'a> Melody {
                 choices.append(&mut applied_key_options);
 
                 option = *choices.choose(&mut rand::thread_rng()).unwrap();
-                previous_x_notes = result.iter().rev().take(4).copied().chain(std::iter::once(option)).collect();
+                previous_x_notes = result.iter().rev().take(4)
+                    .copied().chain(std::iter::once(option)).collect();
                 previous_x_notes.reverse();
                 if tries > 80 {
                     break;
@@ -160,7 +172,9 @@ impl<'a> Melody {
             .unwrap_or(&chords[0])
     }
 
-    pub fn merge_pitches_with_rhythm(pitches: &[i32], rhythm: &[String]) -> Vec<(i32, f32, f32)> {
+    pub fn merge_pitches_with_rhythm(
+        pitches: &[i32], rhythm: &[String])
+         -> Vec<(i32, f32, f32)> {
         let mut result: Vec<(i32, f32, f32)> = Vec::new();
         let mut time_length: f32 = 0.0;
         

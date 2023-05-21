@@ -13,13 +13,14 @@ mod song;
 pub fn sanitize_for_javascript(notes: Vec<(i32, f32, f32)>) -> String {
     let converted: Vec<String> = notes
         .iter()
-        .map(|(num, float1, float2)| format!("({}, {}, {})", num, float1, float2))
+        .map(|(num, float1, float2)| 
+            format!("({}, {}, {})", num, float1, float2))
         .collect();
     format!("[{}]", converted.join(", "))
 }
 
 fn main() {
-    let solution = generate_song();
+    let solution: Vec<(i32, f32, f32)> = generate_song();
     println!("{}", sanitize_for_javascript(solution));
 }
 

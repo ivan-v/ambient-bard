@@ -2,7 +2,8 @@ use phf::{phf_map};
 
 use crate::{applied_key::AppliedKey, chord_progression, melody::clamp_to_range};
 
-pub static CHORD_TYPE_TO_PITCHES: phf::Map<&'static str, &'static [i32]> = phf_map! {
+pub static CHORD_TYPE_TO_PITCHES: 
+    phf::Map<&'static str, &'static [i32]> = phf_map! {
     "M" => &[0, 4, 7],
     "m" => &[0, 3, 7],
     "suss" => &[0, 5, 7],
@@ -58,9 +59,11 @@ pub static STARTING_PITCH: phf::Map<&'static str, i32> = phf_map! {
     "Bs" => 60,
 };
 
-fn roman_numeral_to_note(applied_key_root: String, applied_key_tones: &[i32], roman_numeral: &str) -> i32 {
-    let mut modifier = 0;
-    let mut roman_numeral = roman_numeral.to_string();
+fn roman_numeral_to_note(
+    applied_key_root: String, applied_key_tones: &[i32], roman_numeral: &str)
+     -> i32 {
+    let mut modifier: i32 = 0;
+    let mut roman_numeral: String = roman_numeral.to_string();
 
     if roman_numeral.starts_with("b") {
         modifier = -1;
@@ -70,15 +73,22 @@ fn roman_numeral_to_note(applied_key_root: String, applied_key_tones: &[i32], ro
         roman_numeral = roman_numeral[1..].to_string();
     }
 
-    let r_n = roman_numeral.to_lowercase();
+    let r_n: String = roman_numeral.to_lowercase();
     match r_n.as_str() {
-        "i" => applied_key_tones[0] + modifier + STARTING_PITCH[&applied_key_root],
-        "ii" => applied_key_tones[1] + modifier + STARTING_PITCH[&applied_key_root],
-        "iii" => applied_key_tones[2] + modifier + STARTING_PITCH[&applied_key_root],
-        "iv" => applied_key_tones[3] + modifier + STARTING_PITCH[&applied_key_root],
-        "v" => applied_key_tones[4] + modifier + STARTING_PITCH[&applied_key_root],
-        "vi" => applied_key_tones[5] + modifier + STARTING_PITCH[&applied_key_root],
-        "vii" => applied_key_tones[6] + modifier + STARTING_PITCH[&applied_key_root],
+        "i" => 
+            applied_key_tones[0] + modifier + STARTING_PITCH[&applied_key_root],
+        "ii" => 
+            applied_key_tones[1] + modifier + STARTING_PITCH[&applied_key_root],
+        "iii" => 
+            applied_key_tones[2] + modifier + STARTING_PITCH[&applied_key_root],
+        "iv" => 
+            applied_key_tones[3] + modifier + STARTING_PITCH[&applied_key_root],
+        "v" => 
+            applied_key_tones[4] + modifier + STARTING_PITCH[&applied_key_root],
+        "vi" => 
+            applied_key_tones[5] + modifier + STARTING_PITCH[&applied_key_root],
+        "vii" => 
+            applied_key_tones[6] + modifier + STARTING_PITCH[&applied_key_root],
         _ => panic!("Numeral not found in applied_key: {}", roman_numeral),
     }
 }
@@ -94,21 +104,33 @@ pub struct Chord {
 }
 
 impl Chord {
-    pub fn new(root: String, type_: Option<String>, operating_bit: Option<String>, pitches: Option<Vec<i32>>) -> Self {
-        let type_ = type_.unwrap_or(if root.chars().next().unwrap().is_lowercase() { "m".to_owned() } else { "M".to_owned() });
-        let operating_bit = operating_bit.unwrap_or_default();
+    pub fn new(
+        root: String, type_: Option<String>, 
+        operating_bit: Option<String>, pitches: Option<Vec<i32>>)
+         -> Self {
+        let type_: String = type_.unwrap_or(if root.chars()
+            .next().unwrap().is_lowercase() 
+                { "m".to_owned() } else { "M".to_owned() });
+        let operating_bit: String = operating_bit.unwrap_or_default();
         let aps:Vec<Vec<i32>> = if !operating_bit.is_empty() {
-            let undertone = get_undertone(type_.contains("m"), operating_bit.clone());
-            (0..8).map(|octave| {
-                CHORD_TYPE_TO_PITCHES[&type_].iter().map(|pitch| pitch + octave * 12 + STARTING_PITCH[&root]).chain(std::iter::once(undertone + octave * 12 + STARTING_PITCH[&root])).collect()
+            let undertone: i32 = 
+            get_undertone(type_.contains("m"), operating_bit.clone());
+            (0..8).map(|octave: i32| {
+                CHORD_TYPE_TO_PITCHES[&type_].iter()
+                .map(|pitch| pitch + octave * 12 + STARTING_PITCH[&root])
+                .chain(std::iter::once(
+                    undertone + octave * 12 + STARTING_PITCH[&root]))
+                .collect()
             }).collect()
         } else {
-            (0..8).map(|octave| {
-                CHORD_TYPE_TO_PITCHES[&type_].iter().map(|pitch| pitch + octave * 12 + STARTING_PITCH[&root]).collect()
+            (0..8).map(|octave: i32| {
+                CHORD_TYPE_TO_PITCHES[&type_].iter()
+                .map(|pitch| pitch + octave * 12 + STARTING_PITCH[&root])
+                .collect()
             }).collect()
         };
-        let pitches = pitches.unwrap_or_else(|| aps[4].to_vec());
-        let time = None;
+        let pitches: Vec<i32> = pitches.unwrap_or_else(|| aps[4].to_vec());
+        let time: Option<(f32, f32)> = None;
         Self {
             root,
             type_,
@@ -120,20 +142,36 @@ impl Chord {
     }
 
     pub(crate) fn clone(&self) -> Chord {
-        return Self::new(self.root.clone(), Some(self.type_.clone()), Some(self.operating_bit.clone()), Some(self.pitches.clone()));
+        return Self::new(
+            self.root.clone(), Some(self.type_.clone()),
+            Some(self.operating_bit.clone()), 
+            Some(self.pitches.clone()));
     }
 }
 
-pub fn roman_progression_to_chords(applied_key: &AppliedKey, roman_progression: Vec<Vec<&str>>) -> Vec<Chord> {
-    let mut result = Vec::new();
+pub fn roman_progression_to_chords(
+    applied_key: &AppliedKey, roman_progression: Vec<Vec<&str>>)
+    -> Vec<Chord> {
+    let mut result: Vec<Chord> = Vec::new();
     for chord in roman_progression {
-        let note = roman_numeral_to_note(applied_key.root.to_string(), applied_key.tones, chord[0]);
-        let clamped_note = clamp_to_range(note, (60, 71)); 
-        let root_note = STARTING_PITCH.into_iter().find_map(|(key, &val)| if val == clamped_note { Some(key) } else { None }).unwrap();
+        let note: i32 = roman_numeral_to_note(
+            applied_key.root.to_string(), 
+            applied_key.tones, 
+            chord[0]);
+        let clamped_note: i32 = clamp_to_range(note, (60, 71)); 
+        let root_note: &&str = STARTING_PITCH.into_iter()
+            .find_map(|(key, &val)| 
+            if val == clamped_note { Some(key) } else { None }).unwrap();
         let chord_type_split: Vec<&str> = chord[1].split('/').collect();
-        let operating_bit = if chord_type_split.len() < 2 { "" } else { chord_type_split[1] };
-        let chord_type = chord_type_split[0];
-        result.push(Chord::new(root_note.to_string(), Some(chord_type.to_string()), Some(operating_bit.to_string()),None));
+        let operating_bit: &str 
+            = if chord_type_split.len() < 2 { "" } else { chord_type_split[1] };
+        let chord_type: &str = chord_type_split[0];
+        result.push(
+            Chord::new(
+                root_note.to_string(), 
+                Some(chord_type.to_string()), 
+                Some(operating_bit.to_string()),
+            None));
     }
     result
 }
@@ -159,12 +197,14 @@ fn get_undertone(is_minor: bool, operating_bit: String) -> i32 {
     }
 }
 
-pub fn reset_chord_times(chords: &[Chord], meter: [f32; 2]) -> Vec<(Chord, (f32, f32))> {
+pub fn reset_chord_times(chords: &[Chord], meter: [f32; 2]) 
+    -> Vec<(Chord, (f32, f32))> {
     let mut time_length = 0.0;
     let mut result = Vec::new();
 
     for chord in chords {
-        let chord_time = (time_length, time_length + meter[0] / (meter[1] / 4.0));
+        let chord_time = (time_length, 
+            time_length + meter[0] / (meter[1] / 4.0));
         result.push((chord.clone(), chord_time));
         time_length += meter[0] / (meter[1] / 4.0);
     }
@@ -172,21 +212,26 @@ pub fn reset_chord_times(chords: &[Chord], meter: [f32; 2]) -> Vec<(Chord, (f32,
     result
 }
 
-pub fn generate_chord_progression_as_roman(desired_length: i32, is_major: bool) -> Vec<Vec<&'static str>> {
+pub fn generate_chord_progression_as_roman(
+    desired_length: i32, is_major: bool)
+     -> Vec<Vec<&'static str>> {
     // let mut length = 0; TODO: make length work correctly (not get stuck infinitely)
     let mut progression: Vec<Vec<&str>>;
     if is_major {
-        progression = chord_progression::grow_major_chord_progression(Vec::new());
+        progression 
+        = chord_progression::grow_major_chord_progression(Vec::new());
     } else {
-        progression = chord_progression::grow_minor_chord_progression(Vec::new());
+        progression 
+        = chord_progression::grow_minor_chord_progression(Vec::new());
     }
     
     while (progression.len() as i32) < desired_length {
-        println!("{:?}", progression);
         if is_major {
-            progression = chord_progression::grow_major_chord_progression(progression);
+            progression 
+            = chord_progression::grow_major_chord_progression(progression);
         } else {
-            progression = chord_progression::grow_minor_chord_progression(progression);
+            progression 
+            = chord_progression::grow_minor_chord_progression(progression);
         }
     }
     progression.reverse();
@@ -194,7 +239,11 @@ pub fn generate_chord_progression_as_roman(desired_length: i32, is_major: bool) 
     progression
 }
 
-pub fn generate_chord_progression(desired_length: i32, is_major: bool, applied_key: &AppliedKey) -> Vec<Chord> {
-    roman_progression_to_chords(applied_key, generate_chord_progression_as_roman(desired_length, is_major))
+pub fn generate_chord_progression(
+    desired_length: i32, is_major: bool, applied_key: &AppliedKey)
+     -> Vec<Chord> {
+    roman_progression_to_chords(applied_key, 
+        generate_chord_progression_as_roman(
+            desired_length, is_major))
 }
 

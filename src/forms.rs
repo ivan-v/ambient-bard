@@ -16,9 +16,11 @@ pub static FORMS: phf::Map<&'static str, &'static [&'static str]> = phf_map! {
     "Verse-chorus"  => &["Intro", "A", "B", "A", "C", "B", "C", "B"],
 };
 
-pub fn sync_note_durations(notes: Vec<(i32, f32, f32)>, starting_time: Option<f32>) -> Vec<(i32, f32, f32)> {
-    let mut result = Vec::new();
-    let mut time_length = starting_time.unwrap_or(0.0);
+pub fn sync_note_durations(
+    notes: Vec<(i32, f32, f32)>, starting_time: Option<f32>)
+     -> Vec<(i32, f32, f32)> {
+    let mut result: Vec<(i32, f32, f32)> = Vec::new();
+    let mut time_length: f32 = starting_time.unwrap_or(0.0);
 
     for i in 0..notes.len() {
         result.push((notes[i].0, notes[i].1, time_length));

@@ -1,16 +1,19 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-pub fn grow_minor_chord_progression(mut progression: Vec<Vec<&str>>) -> Vec<Vec<&str>> {
-    let mut rng = thread_rng();
+pub fn grow_minor_chord_progression(
+    mut progression: Vec<Vec<&str>>)
+     -> Vec<Vec<&str>> {
+    let mut rng: rand::rngs::ThreadRng = thread_rng();
     let options: Vec<(&str, Vec<&str>)>;
     if progression.is_empty() {
         options = vec![("i", vec!["suss", "m"])];
-        let selected = options.choose(&mut rng).unwrap();
-        let first_chord = vec![selected.0, selected.1.choose(&mut rng).unwrap()];
+        let selected: &(&str, Vec<&str>) = options.choose(&mut rng).unwrap();
+        let first_chord: Vec<&str> 
+        = vec![selected.0, selected.1.choose(&mut rng).unwrap()];
         return vec![first_chord];
     } else {
-        let root = &progression[0];
+        let root: &Vec<&str> = &progression[0];
         if root[0] == "i" && (root[1] == "suss" || root[1] == "m") {
             options = vec![
                 ("bVII",  vec!["9"]),
@@ -54,7 +57,8 @@ pub fn grow_minor_chord_progression(mut progression: Vec<Vec<&str>>) -> Vec<Vec<
                 ("bVI",  vec!["6", "M7"]),
                 ("iv",   vec!["m/b6", "m6/b6", "m7/b6"]),
             ];
-        } else if root[0] == "V" && (root[1] == "7" || root[1] == "b9" || root[1] == "suss") {
+        } else if root[0] == "V" && (root[1] == "7" || root[1] == "b9" 
+            || root[1] == "suss") {
             options = vec![
                 ("iv",   vec!["m", "m6", "m7", "m9"]),
                 ("bII",  vec!["M"]),
@@ -75,37 +79,46 @@ pub fn grow_minor_chord_progression(mut progression: Vec<Vec<&str>>) -> Vec<Vec<
             options = vec![
                 ("V",   vec!["dim7", "m7b5"]),
             ];
-        } else if (root[0] == "bIII" && root[1] == "aug") || (root[0] == "i" && root[1] == "m/b3") {
+        } else if (root[0] == "bIII" && root[1] == "aug") 
+            || (root[0] == "i" && root[1] == "m/b3") {
             options = vec![
                 ("bii",  vec!["dim"]),
                 ("vii",  vec!["dim/2"]),
             ];
-        } else if (root[0] == "bVI" && (root[1] == "6" || root[1] == "M7")) || (root[0] == "iv" && (root[1] == "m/b6" || root[1] == "m6/b6" || root[1] == "m7/b6" || root[1] == "m6" || root[1] == "m7" || root[1] == "m9")) {
+        } else if (root[0] == "bVI" && (root[1] == "6" || root[1] == "M7")) 
+            || (root[0] == "iv" && (root[1] == "m/b6" || root[1] == "m6/b6" 
+            || root[1] == "m7/b6" || root[1] == "m6" || root[1] == "m7" 
+            || root[1] == "m9")) {
             options = vec![
                 ("bIII", vec!["7", "9", "b9"]),
                 ("V",    vec!["m7b5"]),
             ];
-        } else if root[0] == "bIII" && (root[1] == "7" || root[1] == "9" || root[1] == "b9") {
+        } else if root[0] == "bIII" && 
+            (root[1] == "7" || root[1] == "9" || root[1] == "b9") {
             options = vec![(
                 ("bvii", vec!["m7b5"])
             )];
         } else {
             return progression;
         }
-        let selected = options.choose(&mut rng).unwrap();
-        let new_chord = vec![selected.0, selected.1.choose(&mut rng).unwrap()];
+        let selected: &(&str, Vec<&str>) = options.choose(&mut rng).unwrap();
+        let new_chord: Vec<&str> 
+            = vec![selected.0, selected.1.choose(&mut rng).unwrap()];
         progression.insert(0, new_chord);
         return progression;
     }
 }
 
-pub fn grow_major_chord_progression(mut progression: Vec<Vec<&str>>) -> Vec<Vec<&str>> {
+pub fn grow_major_chord_progression(
+    mut progression: Vec<Vec<&str>>)
+     -> Vec<Vec<&str>> {
     let mut rng = thread_rng();
     let options: Vec<(&str, Vec<&str>)>;
     if progression.is_empty() {
         options = vec![("I", vec!["6", "M7", "M9", "suss"])];
-        let selected = options.choose(&mut rng).unwrap();
-        let first_chord = vec![selected.0, selected.1.choose(&mut rng).unwrap()];
+        let selected: &(&str, Vec<&str>) = options.choose(&mut rng).unwrap();
+        let first_chord: Vec<&str> 
+            = vec![selected.0, selected.1.choose(&mut rng).unwrap()];
         return vec![first_chord];
     } else {
         let root = &progression[0];
@@ -179,11 +192,13 @@ pub fn grow_major_chord_progression(mut progression: Vec<Vec<&str>>) -> Vec<Vec<
                 ("bVII",   vec!["9"]),
                 ("#IV",   vec!["m7b5"]),
             ];
-        } else if root[0] == "VI" && (root[1] == "7" || root[1] == "9" || root[1] == "b9") {
+        } else if root[0] == "VI" && 
+            (root[1] == "7" || root[1] == "9" || root[1] == "b9") {
             options = vec![
                 ("III",  vec!["m7b5"]),
             ];
-        } else if root[0] == "I" && (root[1] == "7" || root[1] == "9" || root[1] == "b9") {
+        } else if root[0] == "I" && 
+            (root[1] == "7" || root[1] == "9" || root[1] == "b9") {
             options = vec![
                 ("V",   vec!["m7"]),
             ];
@@ -191,15 +206,17 @@ pub fn grow_major_chord_progression(mut progression: Vec<Vec<&str>>) -> Vec<Vec<
             options = vec![
                 ("#IV",  vec!["m7b5"]),
             ];
-        } else if root[0] == "III" && (root[1] == "7" || root[1] == "9" || root[1] == "b9") {
+        } else if root[0] == "III" && 
+            (root[1] == "7" || root[1] == "9" || root[1] == "b9") {
             options = vec![
                 ("VII",  vec!["m7b5"]),
             ];
         } else {
             return progression;
         }
-        let selected = options.choose(&mut rng).unwrap();
-        let new_chord = vec![selected.0, selected.1.choose(&mut rng).unwrap()];
+        let selected: &(&str, Vec<&str>) = options.choose(&mut rng).unwrap();
+        let new_chord: Vec<&str> 
+            = vec![selected.0, selected.1.choose(&mut rng).unwrap()];
         progression.insert(0, new_chord);
         return progression;
     }
