@@ -11,14 +11,14 @@ pub static MODES: phf::Map<&'static str, &'static [i32]> = phf_map! {
     "Aeolian" => &[0, 2, 3, 5, 7, 8, 10],
 };
 
-pub struct Applied_Key<'a> {
+pub struct AppliedKey<'a> {
     pub name: String,
     pub root: &'a str,
     pub tones: &'a [i32],
     pub aps: Vec<i32>,
 }
 
-impl<'a> Applied_Key<'a> {
+impl<'a> AppliedKey<'a> {
     pub fn new(root: &'a str, mode: &'a str) -> Self {
         let tones = MODES[mode];
         let mut aps = Vec::new();
@@ -33,6 +33,17 @@ impl<'a> Applied_Key<'a> {
             root,
             tones,
             aps,
+        }
+    }
+}
+
+impl Clone for AppliedKey<'static> {
+    fn clone(&self) -> Self {
+        AppliedKey {
+            name: self.name.clone(),
+            root: self.root,
+            tones: self.tones,
+            aps: self.aps.clone(),
         }
     }
 }
